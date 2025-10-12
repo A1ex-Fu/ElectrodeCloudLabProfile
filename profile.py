@@ -36,7 +36,7 @@ for i, role in enumerate(roles):
     iface = node.addInterface("if{}".format(i + 1))
     lan.addInterface(iface)
 
-    script = f"/local/repository/{scripts[i]}"
+    script = "/local/repository/{}".format(scripts[i])
     if role == "client":
         targets = "10.10.1.2 10.10.1.3 10.10.1.4"
         cmd = f"bash {script} {params.branch} {targets}"
