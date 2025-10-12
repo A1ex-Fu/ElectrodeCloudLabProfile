@@ -1,50 +1,45 @@
 # -*- coding: utf-8 -*-
 
-# CloudLab profile: 4-node LAN, smalllan-style LAN setup, optional phystype
+# Import the necessary CloudLab libraries.
 import geni.portal as portal
-import geni.rspec.pg as pg
+import geni.rspec.pg as rspec
 
-class G:
-    image = "urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU22-64-STD"
-
+# Create a portal context.
 pc = portal.Context()
-rs = pc.makeRequestRSpec()
 
-# Parameters
-pc.defineParameter("phystype", "Optional physical node type",
-                   portal.ParameterType.NODETYPE, "",
-                   longDescription="Pick a physical node type like c6525, d710, etc.")
+# Create a Request object to start building the RSpec.
+request = pc.makeRequestRSpec()
 
-pc.defineParameter("branch", "Git branch to checkout",
-                   portal.ParameterType.STRING, "main")
+# Define the OS Image to use. UBUNTU20-64-STD is the standard 64-bit Ubuntu 20.04 image.
+IMAGE = 'urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU20-64-STD'
 
-params = pc.bindParameters()
+# Define the number of nodes.
+NUM_NODES = 4
 
-# Create LAN like smalllan — no bandwidth setting
-lan = pg.LAN("lan")
+# Create a LAN to connect all nodes.
+lan = request.LAN("lan")
+lan.bandwidth = 25600000  # Set bandwidth to 25 Gbps (in Kbps)
 
-# Roles and setup scripts
-roles = ["replica0", "witness", "replica2", "client"]
-scripts = ["setup-replica.sh", "setup-witness.sh", "setup-replica.sh", "setup-client.sh"]
+# Create the nodes and add them to the LAN.
+for i in range(NUM_NODES):
+    node = request.RawPC("node-{}".format(i+1))
+    node.hardware_type = 'xl170'
+    node.disk_image = IMAGE
 
-for i, role in enumerate(roles):
-    node = rs.RawPC(role)
-    node.disk_image = G.image
-    if params.phystype:
-        node.hardware_type = params.phystype
-
-    iface = node.addInterface("if{}".format(i + 1))
+    # Add an interface to the node and connect to LAN
+    iface = node.addInterface("if1")
     lan.addInterface(iface)
 
-    script = "/local/repository/{}".format(scripts[i])
-    if role == "client":
-        targets = "10.10.1.2 10.10.1.3 10.10.1.4"
-        cmd = f"bash {script} {params.branch} {targets}"
+    # Assign roles: node-1 is the client, others are Paxos replicas
+    if i == 0:
+        node.addService(rspec.Execute(shell="sh", command="/local/repository/setup_client.sh"))
     else:
-        client_ip = "10.10.1.5"
-        ip = f"10.10.1.{i+2}"
-        cmd = f"bash {script} {params.branch} {i} {ip} {client_ip}"
+        node.addService(rspec.Execute(shell="sh", command="/local/repository/setup_replica.sh"))
 
-    node.addService(pg.Execute(shell="bash", command=f"sudo -u geniuser -H {cmd}"))
+    # Performance tuning: reserve cores and disable irqbalance
+    node.addService(rspec.Execute(shell="sh", command="echo 1 > /sys/bus/workqueue/devices/writeback/cpumask"))
+    node.addService(rspec.Execute(shell="sh", command="echo 2 > /sys/bus/workqueue/devices/writeback/cpumask"))
+    node.addService(rspec.Execute(shell="sh", command="systemctl disable irqbalance"))
 
-pc.printRequestRSpec(rs)
+# Print the RSpec to the RSpec editor.
+pc.printRequestRSpec(request)
