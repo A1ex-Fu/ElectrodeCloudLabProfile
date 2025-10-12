@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # CloudLab profile: 4-node LAN, smalllan-style LAN setup, optional phystype
 import geni.portal as portal
 import geni.rspec.pg as pg
