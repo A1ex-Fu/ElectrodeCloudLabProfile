@@ -14,7 +14,7 @@ request = pc.makeRequestRSpec()
 IMAGE = 'urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU20-64-STD'
 
 # Define the number of nodes.
-NUM_NODES = 4
+NUM_NODES = 10
 
 # Create a LAN to connect all nodes.
 lan = request.LAN("lan")
@@ -31,10 +31,10 @@ for i in range(NUM_NODES):
     lan.addInterface(iface)
 
     # Assign roles: node-1 is the client, others are Paxos replicas
-    if i == 0:
-        node.addService(rspec.Execute(shell="sh", command="/local/repository/setup_client.sh"))
-    else:
-        node.addService(rspec.Execute(shell="sh", command="/local/repository/setup_replica.sh"))
+    # if i == 0:
+    #     node.addService(rspec.Execute(shell="sh", command="/local/repository/setup_client.sh"))
+    # else:
+    #     node.addService(rspec.Execute(shell="sh", command="/local/repository/setup_replica.sh"))
 
     # Performance tuning: reserve cores and disable irqbalance
     node.addService(rspec.Execute(shell="sh", command="echo 1 > /sys/bus/workqueue/devices/writeback/cpumask"))
