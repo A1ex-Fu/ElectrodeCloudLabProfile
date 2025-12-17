@@ -14,7 +14,7 @@ request = pc.makeRequestRSpec()
 IMAGE = 'urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU20-64-STD'
 
 # Define the number of nodes.
-NUM_NODES = 10
+NUM_NODES = 8
 
 # Create a LAN to connect all nodes.
 lan = request.LAN("lan")
