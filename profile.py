@@ -14,11 +14,11 @@ request = pc.makeRequestRSpec()
 IMAGE = 'urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU20-64-STD'
 
 # Define the number of nodes.
-NUM_NODES = 4 
+NUM_NODES = 10
 
 # Create a LAN to connect all nodes.
 lan = request.LAN("lan")
-lan.bandwidth = 25600000  # Set bandwidth to 25 Gbps (in Kbps)
+lan.bandwidth = 10000000  # Set bandwidth to 25 Gbps (in Kbps)
 
 lan.best_effort = True
 
