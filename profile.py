@@ -18,7 +18,7 @@ NUM_NODES = 10
 
 # Create a LAN to connect all nodes.
 lan = request.LAN("lan")
-lan.bandwidth = 10000000  # Set bandwidth to 25 Gbps (in Kbps)
+lan.bandwidth = 1000000  # Set bandwidth to 25 Gbps (in Kbps)
 
 lan.best_effort = True
 
